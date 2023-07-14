@@ -1,0 +1,7 @@
+{
+    "cmake.configureArgs": [
+        "-Wno-dev",
+        "-DCATKIN_DEVEL_PREFIX=${workspaceFolder}/../../devel"
+    ],
+    "cmake.buildDirectory": "${workspaceFolder}/../../build"
+}

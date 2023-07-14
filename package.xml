@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package format="2">
+    <name>ff_lins</name>
+    <version>1.0.0</version>
+    <description>The FF-LINS ROS Interface</description>
+
+    <license>GPLv3</license>
+
+    <maintainer email="thl@whu.edu.cn">hailiang</maintainer>
+    <author email="thl@whu.edu.cn">hailiang</author>
+
+    <buildtool_depend>catkin</buildtool_depend>
+
+    <depend>livox_ros_driver</depend>
+    <depend>pcl_conversions</depend>
+    <depend>roscpp</depend>
+    <depend>std_msgs</depend>
+
+</package>

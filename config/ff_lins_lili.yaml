@@ -1,0 +1,55 @@
+# FF_LINS融合定位算法配置文件
+
+# 结果输出路径
+outputpath: "path"
+is_make_outputdir: true
+
+# 是否开启可视化
+is_use_visualization: true
+
+# IMU噪声建模参数
+imu:
+    imudatarate: 200 # IMU原始数据频率, Hz
+
+    arw: 2.0 # deg/sqrt(hr)
+    vrw: 5.0 # m/s/sqrt(hr)
+    gbstd: 200 # deg/hr
+    abstd: 500 # mGal
+    corrtime: 1.0 # hr
+
+    gb_prior_std: 1500 # deg/hr
+    ab_prior_std: 30000 # mGal
+
+# 优化器
+optimizer:
+    optimize_point_to_plane_std: 0.1 # 点到面观测协方差, m
+    optimize_window_size: 10 # 滑动窗口大小
+
+    optimize_estimate_lidar_extrinsic: true # 是否估计雷达和IMU的外参
+    optimize_estimate_lidar_td: true # 是否估计雷达和IMU之间的时间间隔
+    optimize_lidar_extrinsic_accurate: false # 雷达和IMU的外参初值准确
+
+lidar:
+    is_use_lidar: false
+
+    # 激光参数
+    scan_line: 6 # 扫描线数
+    point_filter_num: 10 # 原始点抽取滤波器
+    nearest_distance: 1 # 扫描盲区, m
+    farthest_distance: 250.0 # 最远距离, m
+    frame_rate: 10 # 帧率, Hz
+
+    # 点云处理
+    downsample_size: 0.5 # 体素滤波栅格大小, m
+    plane_estimation_threshold: 0.1 # 平面拟合最大点到面距离, m
+    is_save_pointcloud: false # 保存点云地图
+    minimum_keyframe_translation: 0.4 # 关键帧选择最小距离
+
+    # 雷达IMU外参 Pb = q_b_l * Pl + t_b_l
+    # q (x, y, z, w)
+    q_b_l: [1, 0, 0, 0]
+    t_b_l: [0.05512, -0.02226, 0.0297]
+
+    # IMU时间延时
+    # t_b = t_l + td
+    td_b_l: 0.0

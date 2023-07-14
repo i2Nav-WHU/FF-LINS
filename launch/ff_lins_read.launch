@@ -1,0 +1,19 @@
+<launch>
+    <arg name="configfile" default=""/>
+    <arg name="bagfile" default=""/>
+
+    <node name="ff_lins_node" pkg="ff_lins" type="ff_lins_ros" output="screen">
+        <param name="imu_topic" value="/livox/imu"/>
+        <param name="lidar_topic" value="/livox/lidar"/>
+
+        <param name="configfile" value="$(arg configfile)"/>
+
+        <param name="is_read_bag" value="true"/>
+        <param name="bagfile" value="$(arg bagfile)"/>
+    </node>
+
+    <node pkg="tf2_ros" type="static_transform_publisher" name="world_to_map_broadcaster"
+          args="0 0 0 -1 0 0 0 map world"/>
+    <node name="visualisation" pkg="rviz" type="rviz" output="log" args="-d $(find ff_lins)/config/visualization.rviz"/>
+
+</launch>
