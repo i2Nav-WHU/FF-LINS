@@ -10,7 +10,7 @@ Most of the existing LiDAR-inertial navigation systems are based on frame-to-map
 
 **Related Paper:**
 
-- Hailiang Tang, Tisheng Zhang, Xiaoji Niu, Liqiang Wang, Linfu Wei, and Jingnan Liu, “FF-LINS: A Consistent Frame-to-Frame Solid-State-LiDAR-Inertial State Estimator,” *arXiv.org*, 2023. https://arxiv.org/abs/2307.06632v1.
+- Hailiang Tang, Tisheng Zhang, Xiaoji Niu, Liqiang Wang, Linfu Wei, and Jingnan Liu, “FF-LINS: A Consistent Frame-to-Frame Solid-State-LiDAR-Inertial State Estimator,” *IEEE Robotics and Automation Letters*, 2023.
 - Hailiang Tang, Tisheng Zhang, Xiaoji Niu, Liqiang Wang, and Jingnan Liu, "LE-VINS: A Robust Solid-State-LiDAR-Enhanced Visual-Inertial Navigation System for Low-Speed Robots," *IEEE Transactions on Instrumentation and Measurement*, 2023.
 - Xiaoji Niu, Hailiang Tang, Tisheng Zhang, Jing Fan, and Jingnan Liu, “IC-GVINS: A Robust, Real-time, INS-Centric GNSS-Visual-Inertial Navigation System,” *IEEE Robotics and Automation Letters*, 2023.
 - Hailiang Tang, Tisheng Zhang, Xiaoji Niu, Jing Fan, and Jingnan Liu, “Impact of the Earth Rotation Compensation on MEMS-IMU Preintegration of Factor Graph Optimization,” *IEEE Sensors Journal*, 2022.
@@ -122,8 +122,6 @@ The IMU should be in the **front-right-down** format in FF-LINS.
 | *East*      | 1251                  | 3.64                   | [East.bag](https://pan.baidu.com/s/1XkySrd_fOGTAV6CzLGourQ?pwd=ip3a)      |
 
 ### 3.3 R3LIVE Campus Dataset
-
-The tested sequences are *urban38* and *urban39*.
 
 | Sequence              | Time length (seconds) | Trajectory Length (km) | Baidu Cloud Link                                                               |
 | --------------------- | --------------------- | ---------------------- | ------------------------------------------------------------------------------ |
