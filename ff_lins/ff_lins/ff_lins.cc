@@ -1,5 +1,5 @@
 /*
- * FF-LINS: A Consistent Frame-to-Frame Solid-State-LiDAR-Inertial State Estimator 
+ * FF-LINS: A Consistent Frame-to-Frame Solid-State-LiDAR-Inertial State Estimator
  *
  * Copyright (C) 2023 i2Nav Group, Wuhan University
  *
@@ -117,40 +117,8 @@ LINS::LINS(const string &configfile, const string &outputpath, lidar::LidarViewe
 }
 
 bool LINS::addNewImu(const IMU &imu) {
-    static IMU last_imu{0};
     if (imu_buffer_mutex_.try_lock()) {
-        double dt = imu.time - last_imu.time;
-        if ((dt > imudatadt_ * 1.5) && (last_imu.time != 0)) {
-            LOGE << absl::StrFormat("Lost IMU data at %0.3lf with dt %0.3lf", imu.time, dt);
-
-            long cnts = lround(dt / imudatadt_) - 1;
-
-            IMU imudata;
-            imudata.time = last_imu.time;
-            while (cnts--) {
-                imudata.time += imudatadt_;
-                imudata.dt = imudatadt_;
-
-                // 等效于速率内插
-                double scale   = (imudata.time - last_imu.time) / (imu.time - last_imu.time);
-                imudata.dtheta = last_imu.dtheta + scale * (imu.dtheta - last_imu.dtheta);
-                imudata.dvel   = last_imu.dvel + scale * (imu.dvel - last_imu.dvel);
-
-                imu_buffer_.push(imudata);
-                LOGE << absl::StrFormat("Append extra IMU data at %0.3lf", imudata.time);
-            }
-
-            // 当前IMU历元
-            imudata.dt     = imu.time - imudata.time;
-            imudata.time   = imu.time;
-            imudata.dtheta = imu.dtheta / imu.dt * imudata.dt;
-            imudata.dvel   = imu.dvel / imu.dt * imudata.dt;
-            LOGE << absl::StrFormat("Add current IMU data at %0.3lf", imudata.time);
-        } else {
-            imu_buffer_.push(imu);
-        }
-        last_imu = imu;
-
+        imu_buffer_.push(imu);
         imu_buffer_mutex_.unlock();
         return true;
     }

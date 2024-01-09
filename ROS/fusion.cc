@@ -189,9 +189,6 @@ void Fusion::imuCallback(const sensor_msgs::ImuConstPtr &imumsg) {
     imu_.time = weeksec;
     // delta time
     imu_.dt = imu_.time - imu_pre_.time;
-    if (imu_.dt > (imu_data_dt_ * 1.5)) {
-        imu_.dt = imu_data_dt_;
-    }
 
     // IMU measurements, Front-Right-Down
     imu_.dtheta[0] = imumsg->angular_velocity.x * imu_.dt;
