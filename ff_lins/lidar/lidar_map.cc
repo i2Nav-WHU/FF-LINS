@@ -1,5 +1,5 @@
 /*
- * FF-LINS: A Consistent Frame-to-Frame Solid-State-LiDAR-Inertial State Estimator 
+ * FF-LINS: A Consistent Frame-to-Frame Solid-State-LiDAR-Inertial State Estimator
  *
  * Copyright (C) 2023 i2Nav Group, Wuhan University
  *
@@ -98,10 +98,21 @@ void LidarMap::addNewKeyFrame(LidarFrame::Ptr frame) {
     keyframes_.push_back(frame);
 
     // 构建新的ikdtree, 加入雷达系的点云
-    auto ikdtree = std::make_shared<ikd_Tree::KD_TREE<PointType>>();
-    ikdtree->setDownsampleParam(downsample_size_);
-    ikdtree->build(frame->pointCloudMap()->points);
-    lidar_frame_map_[frame->id()] = ikdtree;
+    new_ikd_tree_mutex_.lock();
+    if (!new_ikd_tree_) {
+        new_ikd_tree_ = std::make_shared<ikd_Tree::KD_TREE<PointType>>();
+    }
+    new_ikd_tree_->setDownsampleParam(downsample_size_);
+    new_ikd_tree_->build(frame->pointCloudMap()->points);
+    lidar_frame_map_[frame->id()] = std::move(new_ikd_tree_);
+    new_ikd_tree_mutex_.unlock();
+
+    // 分配下一个ikd-Tree内存
+    task_group_.run([this]() {
+        new_ikd_tree_mutex_.lock();
+        new_ikd_tree_ = std::make_shared<ikd_Tree::KD_TREE<PointType>>();
+        new_ikd_tree_mutex_.unlock();
+    });
 }
 
 void LidarMap::removeOldestLidarFrame() {
@@ -113,9 +124,7 @@ void LidarMap::removeOldestLidarFrame() {
         lidar_frame_map_.erase(marginalized_frame_->id());
 
         // Release the ikd-Tree
-        task_group_.run([ikd_tree]() {
-            ikd_tree->release();
-        });
+        task_group_.run([ikd_tree]() { ikd_tree->release(); });
     }
 
     LOGI << "Remove lidar keyframe at " << Logging::doubleData(marginalized_frame_->stamp());
@@ -130,9 +139,7 @@ void LidarMap::removeNewestLidarFrame() {
         lidar_frame_map_.erase(newest_frame->id());
 
         // Release the ikd-Tree
-        task_group_.run([ikd_tree]() {
-            ikd_tree->release();
-        });
+        task_group_.run([ikd_tree]() { ikd_tree->release(); });
     }
 
     LOGI << "Remove lidar frame at " << Logging::doubleData(newest_frame->stamp());

@@ -172,8 +172,13 @@ void Fusion::processRead(const string &imu_topic, const string &lidar_topic, con
     }
 
     // 等待数据处理结束
+    int sec_cnts = 0;
     while (!lins_->isBufferEmpty()) {
-        usleep(100);
+        sleep(1);
+        if (sec_cnts++ > 20) {
+            LOGW << "Waiting FF-LINS processing timeout";
+            break;
+        }
     }
 }
 

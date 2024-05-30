@@ -1,5 +1,5 @@
 /*
- * FF-LINS: A Consistent Frame-to-Frame Solid-State-LiDAR-Inertial State Estimator 
+ * FF-LINS: A Consistent Frame-to-Frame Solid-State-LiDAR-Inertial State Estimator
  *
  * Copyright (C) 2023 i2Nav Group, Wuhan University
  *
@@ -30,8 +30,8 @@
 #include "lidar/lidar_frame.h"
 #include "lidar/pointcloud.h"
 
-#include <tbb/tbb.h>
 #include <pcl/filters/voxel_grid.h>
+#include <tbb/tbb.h>
 
 #include <memory>
 
@@ -99,6 +99,8 @@ private:
     // 雷达数据
     std::deque<LidarFrame::Ptr> keyframes_;
     tbb::task_group task_group_;
+    ikd_Tree::KD_TREE<PointType>::Ptr new_ikd_tree_{nullptr};
+    std::mutex new_ikd_tree_mutex_;
 
     // 点云处理参数
     double plane_estimation_threshold_;
