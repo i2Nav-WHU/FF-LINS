@@ -6,6 +6,14 @@
         <param name="imu_topic" value="/livox/imu"/>
         <param name="lidar_topic" value="/livox/lidar"/>
 
+        <!-- MCD-Ouster64 -->
+        <!-- <param name="imu_topic" value="/vn200/imu"/>
+        <param name="lidar_topic" value="/os_cloud_node/points"/> -->
+
+        <!-- Velodyne-->
+        <!-- <param name="imu_topic" value="/imu0"/>
+        <param name="lidar_topic" value="/velodyne_points"/> -->
+
         <param name="configfile" value="$(arg configfile)"/>
 
         <param name="is_read_bag" value="true"/>
