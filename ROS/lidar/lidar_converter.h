@@ -1,5 +1,5 @@
 /*
- * FF-LINS: A Consistent Frame-to-Frame Solid-State-LiDAR-Inertial State Estimator 
+ * FF-LINS: A Consistent Frame-to-Frame Solid-State-LiDAR-Inertial State Estimator
  *
  * Copyright (C) 2023 i2Nav Group, Wuhan University
  *
@@ -27,6 +27,7 @@
 
 #include <livox_ros_driver/CustomMsg.h>
 #include <livox_ros_driver/CustomPoint.h>
+#include <sensor_msgs/PointCloud2.h>
 
 using std::vector;
 
@@ -40,6 +41,11 @@ public:
 
     size_t livoxPointCloudConvertion(const livox_ros_driver::CustomMsgConstPtr &msg, PointCloudCustomPtr &pointcloud,
                                      double &start, double &end, bool to_gps_time);
+    size_t velodynePointCloudConvertion(const sensor_msgs::PointCloud2ConstPtr &msg, PointCloudCustomPtr &pointcloud,
+                                        double &start, double &end, bool to_gps_time);
+
+    size_t ousterPointCloudConvertion(const sensor_msgs::PointCloud2ConstPtr &msg, PointCloudCustomPtr &pointcloud,
+                                      double &start, double &end, bool to_gps_time);
 
 private:
     static PointTypeCustom livoxPointConvertion(const livox_ros_driver::CustomPoint &point, uint64_t timebase,

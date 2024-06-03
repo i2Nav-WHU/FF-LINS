@@ -37,8 +37,39 @@ struct PointXYZIT {
 POINT_CLOUD_REGISTER_POINT_STRUCT(PointXYZIT, (float, x, x)(float, y, y)(float, z, z)(float, intensity,
                                                                                       intensity)(double, time, time))
 
+// Velodyne raw point type
+struct EIGEN_ALIGN16 VelodynePoint {
+    PCL_ADD_POINT4D;
+    float intensity;
+    float time;
+    uint16_t ring;
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+};
+
+POINT_CLOUD_REGISTER_POINT_STRUCT(VelodynePoint, (float, x, x)(float, y, y)(float, z, z)(float, intensity, intensity)(
+                                                     float, time, time)(std::uint16_t, ring, ring))
+
+// Ouster raw point type
+struct EIGEN_ALIGN16 OusterPoint {
+    PCL_ADD_POINT4D;
+    float intensity;
+    std::uint32_t t;
+    std::uint16_t reflectivity;
+    std::uint16_t ambient;
+    std::uint32_t range;
+    std::uint8_t ring;
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+} EIGEN_ALIGN16;
+
+POINT_CLOUD_REGISTER_POINT_STRUCT(OusterPoint, (float, x, x)(float, y, y)(float, z, z)(float, intensity, intensity)(
+                                                   std::uint32_t, t, t)(std::uint16_t, reflectivity, reflectivity)(
+                                                   std::uint16_t, ambient, ambient)(std::uint32_t, range,
+                                                                                    range)(std::uint8_t, ring, ring))
+
 enum LidarType {
-    Livox = 1,
+    Livox    = 1,
+    Velodyne = 2,
+    Ouster   = 3,
 };
 
 typedef PointXYZIT PointTypeCustom;

@@ -1,5 +1,5 @@
 /*
- * FF-LINS: A Consistent Frame-to-Frame Solid-State-LiDAR-Inertial State Estimator 
+ * FF-LINS: A Consistent Frame-to-Frame Solid-State-LiDAR-Inertial State Estimator
  *
  * Copyright (C) 2023 i2Nav Group, Wuhan University
  *
@@ -33,6 +33,7 @@
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/Imu.h>
 #include <sensor_msgs/NavSatFix.h>
+#include <sensor_msgs/PointCloud2.h>
 
 #include <memory>
 
@@ -50,6 +51,7 @@ public:
 private:
     void imuCallback(const sensor_msgs::ImuConstPtr &imumsg);
     void livoxCallback(const livox_ros_driver::CustomMsgConstPtr &lidarmsg);
+    void pointCloudCallback(const sensor_msgs::PointCloud2ConstPtr &lidarmsg);
 
     void addImuData(const IMU &imu);
 
@@ -65,6 +67,7 @@ private:
     std::queue<IMU> imu_buffer_;
 
     LidarConverter::Ptr lidar_converter_;
+    int lidar_type_ = Livox;
 };
 
 #endif // FUSION_ROS_H

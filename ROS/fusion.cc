@@ -1,5 +1,5 @@
 /*
- * FF-LINS: A Consistent Frame-to-Frame Solid-State-LiDAR-Inertial State Estimator 
+ * FF-LINS: A Consistent Frame-to-Frame Solid-State-LiDAR-Inertial State Estimator
  *
  * Copyright (C) 2023 i2Nav Group, Wuhan University
  *
@@ -102,6 +102,9 @@ void Fusion::run() {
 
     // lidar数据转换对象
     lidar_converter_ = std::make_shared<LidarConverter>(scan_line, nearest_distance, farthest_distance);
+    if (config["lidar"]["lidar_type"]) {
+        lidar_type_ = config["lidar"]["lidar_type"].as<int>();
+    }
 
     // 创建LINS
     auto lidar_viewer = std::make_shared<LidarViewerRviz>(nh);
@@ -131,8 +134,12 @@ void Fusion::processSubscribe(const string &imu_topic, const string &lidar_topic
     ros::Subscriber imu_sub = nh.subscribe<sensor_msgs::Imu>(imu_topic, 200, &Fusion::imuCallback, this);
 
     // Livox lidar
-    ros::Subscriber lidar_sub =
-        nh.subscribe<livox_ros_driver::CustomMsg>(lidar_topic, 10, &Fusion::livoxCallback, this);
+    ros::Subscriber lidar_sub;
+    if (lidar_type_ == Livox) {
+        lidar_sub = nh.subscribe<livox_ros_driver::CustomMsg>(lidar_topic, 10, &Fusion::livoxCallback, this);
+    } else if ((lidar_type_ == Velodyne) || (lidar_type_ == Ouster)) {
+        lidar_sub = nh.subscribe<sensor_msgs::PointCloud2>(lidar_topic, 10, &Fusion::pointCloudCallback, this);
+    }
 
     LOGI << "Waiting ROS message...";
 
@@ -165,9 +172,16 @@ void Fusion::processRead(const string &imu_topic, const string &lidar_topic, con
             imuCallback(imu_ptr);
         }
 
-        livox_ros_driver::CustomMsgConstPtr livox_ptr = msg.instantiate<livox_ros_driver::CustomMsg>();
-        if (livox_ptr) {
-            livoxCallback(livox_ptr);
+        if (lidar_type_ == Livox) {
+            livox_ros_driver::CustomMsgConstPtr livox_ptr = msg.instantiate<livox_ros_driver::CustomMsg>();
+            if (livox_ptr) {
+                livoxCallback(livox_ptr);
+            }
+        } else if ((lidar_type_ == Velodyne) || (lidar_type_ == Ouster)) {
+            sensor_msgs::PointCloud2ConstPtr points_ptr = msg.instantiate<sensor_msgs::PointCloud2>();
+            if (points_ptr) {
+                pointCloudCallback(points_ptr);
+            }
         }
     }
 
@@ -234,5 +248,20 @@ void Fusion::livoxCallback(const livox_ros_driver::CustomMsgConstPtr &lidarmsg) 
 
     // Create lidar frame
     auto frame = LidarFrame::createFrame(pointcloud->points.front().time, pointcloud->points.back().time, pointcloud);
+    lins_->addNewLidarFrame(frame);
+}
+
+void Fusion::pointCloudCallback(const sensor_msgs::PointCloud2ConstPtr &lidarmsg) {
+    PointCloudCustomPtr pointcloud = PointCloudCustomPtr(new PointCloudCustom);
+    double start = 0, end = 0;
+
+    if (lidar_type_ == Velodyne) {
+        lidar_converter_->velodynePointCloudConvertion(lidarmsg, pointcloud, start, end, true);
+    } else {
+        lidar_converter_->ousterPointCloudConvertion(lidarmsg, pointcloud, start, end, true);
+    }
+
+    // Create lidar frame
+    auto frame = LidarFrame::createFrame(start, end, pointcloud);
     lins_->addNewLidarFrame(frame);
 }

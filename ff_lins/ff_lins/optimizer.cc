@@ -195,7 +195,7 @@ void Optimizer::updateParametersFromOptimizer(const deque<double> &timelist, con
     pose_b_l.R        = Rotation::quaternion2matrix(q_b_l.normalized());
 
     // 保证系统稳定
-    if (optimize_estimate_lidar_td_ && (fabs(extrinsic_b_l_[7]) > 0.02)) {
+    if (optimize_estimate_lidar_td_ && (fabs(extrinsic_b_l_[7]) > 0.2)) {
         LOGW << "Estimate large td_b_l " << Logging::doubleData(extrinsic_b_l_[7]) << ", and td_b_l is reset";
         extrinsic_b_l_[7] = 0;
     }

@@ -171,6 +171,7 @@ void LINS::runFusion() {
     double last_update_time = 0;
 
     PointCloudPtr map_pointcloud = PointCloudPtr(new PointCloud);
+    std::atomic<bool> is_fusing_{false};
 
     LOGI << "Fusion thread is started";
     while (!is_finished_) {
@@ -199,6 +200,11 @@ void LINS::runFusion() {
         if (lidar_frame_buffer_.size() > reserved_buffer_counts_) {
             LOGI << "Buffer size: " << lidar_frame_buffer_.size();
         }
+
+        while (is_fusing_) {
+            usleep(WAITING_DELAY_IN_US);
+        }
+        is_fusing_ = true;
 
         // 融合状态
         if (linsstate_ == LINS_INITIALIZING) {
@@ -263,20 +269,26 @@ void LINS::runFusion() {
 
             // 可视化
             if (is_use_visualization_) {
-                task_group_.run([this, &map_pointcloud]() {
+                task_group_.run([this, &map_pointcloud, &is_fusing_]() {
                     // 更新点云地图
                     lidar_map_->addNewPointCloudToMap(map_pointcloud);
 
                     // 可视化
                     auto frame = lidar_map_->keyframes().back();
                     linsLidarVisualization(frame, map_pointcloud);
+
+                    is_fusing_ = false;
                 });
             } else {
-                task_group_.run([this, &map_pointcloud]() {
+                task_group_.run([this, &map_pointcloud, &is_fusing_]() {
                     // 更新点云地图
                     lidar_map_->addNewPointCloudToMap(map_pointcloud);
+                    is_fusing_ = false;
                 });
             }
+        } else {
+
+            is_fusing_ = false;
         }
 
     } // while
@@ -372,7 +384,7 @@ bool LINS::waitImuAddToInsWindow(double time) {
 }
 
 bool LINS::waitImuDoInsMechanization(double time) {
-    double end_time = time + imudatadt_ * 2;
+    double end_time = time + imudatadt_ * 5;
 
     // 等待IMU数据
     waitImuData(end_time);

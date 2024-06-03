@@ -111,8 +111,8 @@ private:
     const double NORMAL_GRAVITY = 9.8; // 9.8 m/s^2
 
     // INS窗口内的最大数量, 对于200Hz, 保留5秒数据
-    const size_t MAXIMUM_INS_NUMBER = 1000;
-    const size_t RESERVED_INS_NUM   = 400; // INS窗口内保留的数量
+    const size_t MAXIMUM_INS_NUMBER = 2000;
+    const size_t RESERVED_INS_NUM   = 800; // INS窗口内保留的数量
 
     const double RESERVED_BUFFER_LENGTH = 10.0; // Buffer保存的数据时间长度
     const uint32_t WAITING_DELAY_IN_US  = 100;  // 数据等待微秒时间

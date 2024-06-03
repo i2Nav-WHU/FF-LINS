@@ -1,5 +1,5 @@
 /*
- * FF-LINS: A Consistent Frame-to-Frame Solid-State-LiDAR-Inertial State Estimator 
+ * FF-LINS: A Consistent Frame-to-Frame Solid-State-LiDAR-Inertial State Estimator
  *
  * Copyright (C) 2023 i2Nav Group, Wuhan University
  *
@@ -23,6 +23,8 @@
 #include "lidar_converter.h"
 
 #include "common/gpstime.h"
+
+#include <pcl_conversions/pcl_conversions.h>
 
 LidarConverter::LidarConverter(int scan_line, double nearest_distance, double farthest_distance)
     : scan_line_(scan_line) {
@@ -61,6 +63,96 @@ size_t LidarConverter::livoxPointCloudConvertion(const livox_ros_driver::CustomM
                 // 原始点
                 pointcloud->push_back(point);
             }
+        }
+    }
+
+    return pointcloud->size();
+}
+
+size_t LidarConverter::velodynePointCloudConvertion(const sensor_msgs::PointCloud2ConstPtr &msg,
+                                                    PointCloudCustomPtr &pointcloud, double &start, double &end,
+                                                    bool to_gps_time) {
+    pointcloud->clear();
+
+    pcl::PointCloud<VelodynePoint> pointcloud_raw;
+    pcl::fromROSMsg(*msg, pointcloud_raw);
+
+    // 数据包时间
+    double stamp = msg->header.stamp.toSec();
+    if (to_gps_time) {
+        int week;
+        double sow;
+        GpsTime::unix2gps(stamp, week, sow);
+        stamp = sow;
+    }
+
+    PointTypeCustom point;
+
+    start = DBL_MAX;
+    end   = 0;
+    for (size_t k = 0; k < pointcloud_raw.size(); k++) {
+        auto &raw = pointcloud_raw[k];
+
+        point.getVector3fMap() = raw.getVector3fMap();
+        point.intensity        = raw.intensity;
+
+        point.time = stamp + raw.time;
+        if (point.time < start) {
+            start = point.time;
+        }
+        if (point.time > end) {
+            end = point.time;
+        }
+
+        // 不在距离范围内
+        double square_dist = point.getVector3fMap().squaredNorm();
+        if ((square_dist > nearest_square_distance_) && (square_dist < farthest_square_distance_)) {
+            pointcloud->push_back(point);
+        }
+    }
+
+    return pointcloud->size();
+}
+
+size_t LidarConverter::ousterPointCloudConvertion(const sensor_msgs::PointCloud2ConstPtr &msg,
+                                                  PointCloudCustomPtr &pointcloud, double &start, double &end,
+                                                  bool to_gps_time) {
+    pointcloud->clear();
+
+    pcl::PointCloud<OusterPoint> pointcloud_raw;
+    pcl::fromROSMsg(*msg, pointcloud_raw);
+
+    // 数据包时间
+    double stamp = msg->header.stamp.toSec();
+    if (to_gps_time) {
+        int week;
+        double sow;
+        GpsTime::unix2gps(stamp, week, sow);
+        stamp = sow;
+    }
+
+    PointTypeCustom point;
+
+    start = DBL_MAX;
+    end   = 0;
+    for (size_t k = 0; k < pointcloud_raw.size(); k++) {
+        auto &raw = pointcloud_raw[k];
+
+        point.getVector3fMap() = raw.getVector3fMap();
+        point.intensity        = raw.intensity;
+        point.time             = stamp + raw.t * 1.0e-9;
+
+        if (point.time < start) {
+            start = point.time;
+        }
+        if (point.time > end) {
+            end = point.time;
+        }
+
+        // 不在距离范围内
+        double square_dist = point.getVector3fMap().squaredNorm();
+        if ((square_dist > nearest_square_distance_) && (square_dist < farthest_square_distance_)) {
+            pointcloud->push_back(point);
         }
     }
 
