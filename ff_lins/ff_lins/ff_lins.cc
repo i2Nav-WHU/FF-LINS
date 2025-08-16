@@ -292,6 +292,10 @@ void LINS::runFusion() {
         }
 
     } // while
+
+    // 保存结果
+    lidar_map_->saveMapPointCloud();
+
     LOGI << "Fusion thread is exited";
 }
 
@@ -693,7 +697,7 @@ bool LINS::linsInitialization(double last_time, double current_time) {
     accumulateDynamicPointcloud(current_time);
 
     // 可视化地图点云
-    lidar_viewer_->updateMapPointCloud(lidar_map_->keyframes().back()->pointCloudWorld());
+    lidar_viewer_->updateCurrentPointCloud(lidar_map_->keyframes().back()->pointCloudWorld());
 
     return true;
 }

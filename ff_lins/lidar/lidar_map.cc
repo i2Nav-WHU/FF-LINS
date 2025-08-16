@@ -32,6 +32,8 @@
 #include <pcl/filters/random_sample.h>
 #include <pcl/io/pcd_io.h>
 
+#include <filesystem>
+
 namespace lidar {
 
 LidarMap::LidarMap(const string &configfile, const string &outputpath) {
@@ -55,6 +57,14 @@ LidarMap::LidarMap(const string &configfile, const string &outputpath) {
         pcd_file_ = outputpath + "/lins_map.pcd";
 
         saved_pointcloud_ = PointCloudPtr(new PointCloud);
+
+        frame_pcd_path_ = outputpath + "/PointClouds";
+        std::filesystem::create_directory(frame_pcd_path_);
+        frame_pcd_path_ += "/pcd";
+        std::filesystem::create_directory(frame_pcd_path_);
+
+        lidar_pose_saver_ = std::make_shared<FileSaver>(outputpath + "/PointClouds/lidar_pose.csv", 8, FileSaver::TEXT);
+        pose_saver_       = std::make_shared<FileSaver>(outputpath + "/PointClouds/pose.json", 7, FileSaver::TEXT);
     }
 
     // 体素滤波降采样
@@ -125,6 +135,38 @@ void LidarMap::removeOldestLidarFrame() {
 
         // Release the ikd-Tree
         task_group_.run([ikd_tree]() { ikd_tree->release(); });
+    }
+
+    if (is_save_pointcloud_) {
+        // 保存关键帧点云
+        static uint64_t counts = 0;
+        string frame_file      = frame_pcd_path_ + absl::StrFormat("/%d.pcd", counts++);
+
+        pcl::PCDWriter pcd_writer;
+        pcd_writer.writeBinaryCompressed(frame_file, *marginalized_frame_->pointCloudMapFull());
+
+        Pose pose     = marginalized_frame_->pose();
+        Quaterniond q = Quaterniond(pose.R);
+        vector<double> data;
+        data.push_back(marginalized_frame_->stamp());
+        data.push_back(pose.t.x());
+        data.push_back(pose.t.y());
+        data.push_back(pose.t.z());
+        data.push_back(q.x());
+        data.push_back(q.y());
+        data.push_back(q.z());
+        data.push_back(q.w());
+        lidar_pose_saver_->dump(data);
+
+        data.clear();
+        data.push_back(pose.t.x());
+        data.push_back(pose.t.y());
+        data.push_back(pose.t.z());
+        data.push_back(q.w());
+        data.push_back(q.x());
+        data.push_back(q.y());
+        data.push_back(q.z());
+        pose_saver_->dump(data);
     }
 
     LOGI << "Remove lidar keyframe at " << Logging::doubleData(marginalized_frame_->stamp());

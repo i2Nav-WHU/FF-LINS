@@ -26,6 +26,8 @@
 #include "common/integration_state.h"
 #include "common/types.h"
 
+#include "fileio/filesaver.h"
+
 #include "lidar/ikd-Tree/ikd_Tree.h"
 #include "lidar/lidar_frame.h"
 #include "lidar/pointcloud.h"
@@ -114,8 +116,9 @@ private:
     size_t window_size_;
 
     bool is_save_pointcloud_;
-    string pcd_file_;
+    string pcd_file_, frame_pcd_path_;
     PointCloudPtr saved_pointcloud_;
+    FileSaver::Ptr lidar_pose_saver_, pose_saver_;
 
     // 统计参数
     vector<double> statistic_parameters_;
