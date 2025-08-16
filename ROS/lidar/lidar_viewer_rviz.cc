@@ -1,5 +1,5 @@
 /*
- * FF-LINS: A Consistent Frame-to-Frame Solid-State-LiDAR-Inertial State Estimator 
+ * FF-LINS: A Consistent Frame-to-Frame Solid-State-LiDAR-Inertial State Estimator
  *
  * Copyright (C) 2023 i2Nav Group, Wuhan University
  *
@@ -29,6 +29,9 @@
 #include <pcl_conversions/pcl_conversions.h>
 #include <sensor_msgs/PointCloud2.h>
 
+#include <pcl/filters/random_sample.h>
+#include <pcl_conversions/pcl_conversions.h>
+
 LidarViewerRviz::LidarViewerRviz(ros::NodeHandle &nh)
     : is_finished_(false) {
     frame_id_ = "world";
@@ -38,6 +41,8 @@ LidarViewerRviz::LidarViewerRviz(ros::NodeHandle &nh)
     current_pub_ = nh.advertise<sensor_msgs::PointCloud2>("/lidar/current", 10);
     plane_pub_   = nh.advertise<sensor_msgs::PointCloud2>("/lidar/plane", 10);
     map_pub_     = nh.advertise<sensor_msgs::PointCloud2>("/lidar/map", 10);
+
+    map_pointcloud_ = PointCloudPtr(new PointCloud);
 }
 
 void LidarViewerRviz::setFinished() {
@@ -78,7 +83,12 @@ void LidarViewerRviz::run() {
 
 void LidarViewerRviz::updateMapPointCloud(PointCloudPtr pointcloud) {
     std::unique_lock<std::mutex> lock(map_mutex_);
-    map_pointcloud_    = std::move(pointcloud);
+
+    // 随机降采样 1/10
+    pcl::RandomSample<PointType> random_sample;
+    random_sample.setSample(pointcloud->size() / 10);
+    random_sample.setInputCloud(pointcloud);
+    random_sample.filter(*map_pointcloud_);
     is_map_pointcloud_ = true;
 
     update_sem_.notify_one();

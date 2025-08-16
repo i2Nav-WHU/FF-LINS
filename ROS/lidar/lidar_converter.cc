@@ -159,6 +159,59 @@ size_t LidarConverter::ousterPointCloudConvertion(const sensor_msgs::PointCloud2
     return pointcloud->size();
 }
 
+size_t LidarConverter::hesaiPointCloudConvertion(const sensor_msgs::PointCloud2ConstPtr &msg,
+                                                 PointCloudCustomPtr &pointcloud, double &start, double &end,
+                                                 bool to_gps_time) {
+    pointcloud->clear();
+
+    pcl::PointCloud<HesaiPoint> pointcloud_raw;
+    pcl::fromROSMsg(*msg, pointcloud_raw);
+
+    // 数据包时间
+    double stamp = msg->header.stamp.toSec();
+    if (to_gps_time) {
+        int week;
+        double sow;
+        GpsTime::unix2gps(stamp, week, sow);
+        stamp = sow;
+    }
+
+    PointTypeCustom point;
+
+    start = DBL_MAX;
+    end   = 0;
+    for (size_t k = 0; k < pointcloud_raw.size(); k++) {
+        auto &raw              = pointcloud_raw[k];
+        point.getVector3fMap() = raw.getVector3fMap();
+        point.intensity        = raw.intensity;
+
+        // 时间转换
+        if (to_gps_time) {
+            int week;
+            double sow;
+            GpsTime::unix2gps(raw.timestamp, week, sow);
+            point.time = sow;
+        } else {
+            point.time = raw.timestamp;
+        }
+
+        if (point.time < start) {
+            start = point.time;
+        }
+        if (point.time > end) {
+            end = point.time;
+        }
+
+        // 不在距离范围内
+        double square_dist = point.getVector3fMap().squaredNorm();
+        if ((square_dist > nearest_square_distance_) && (square_dist < farthest_square_distance_)) {
+            pointcloud->push_back(point);
+        }
+    }
+
+    return pointcloud->size();
+}
+
 PointTypeCustom LidarConverter::livoxPointConvertion(const livox_ros_driver::CustomPoint &raw, uint64_t timebase,
                                                      bool to_gps_time) {
     PointTypeCustom point;

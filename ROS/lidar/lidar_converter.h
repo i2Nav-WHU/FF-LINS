@@ -47,6 +47,9 @@ public:
     size_t ousterPointCloudConvertion(const sensor_msgs::PointCloud2ConstPtr &msg, PointCloudCustomPtr &pointcloud,
                                       double &start, double &end, bool to_gps_time);
 
+    size_t hesaiPointCloudConvertion(const sensor_msgs::PointCloud2ConstPtr &msg, PointCloudCustomPtr &pointcloud,
+                                     double &start, double &end, bool to_gps_time);
+
 private:
     static PointTypeCustom livoxPointConvertion(const livox_ros_driver::CustomPoint &point, uint64_t timebase,
                                                 bool to_gps_time);

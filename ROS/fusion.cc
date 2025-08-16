@@ -137,7 +137,7 @@ void Fusion::processSubscribe(const string &imu_topic, const string &lidar_topic
     ros::Subscriber lidar_sub;
     if (lidar_type_ == Livox) {
         lidar_sub = nh.subscribe<livox_ros_driver::CustomMsg>(lidar_topic, 10, &Fusion::livoxCallback, this);
-    } else if ((lidar_type_ == Velodyne) || (lidar_type_ == Ouster)) {
+    } else {
         lidar_sub = nh.subscribe<sensor_msgs::PointCloud2>(lidar_topic, 10, &Fusion::pointCloudCallback, this);
     }
 
@@ -177,7 +177,7 @@ void Fusion::processRead(const string &imu_topic, const string &lidar_topic, con
             if (livox_ptr) {
                 livoxCallback(livox_ptr);
             }
-        } else if ((lidar_type_ == Velodyne) || (lidar_type_ == Ouster)) {
+        } else {
             sensor_msgs::PointCloud2ConstPtr points_ptr = msg.instantiate<sensor_msgs::PointCloud2>();
             if (points_ptr) {
                 pointCloudCallback(points_ptr);
@@ -246,6 +246,11 @@ void Fusion::livoxCallback(const livox_ros_driver::CustomMsgConstPtr &lidarmsg) 
 
     lidar_converter_->livoxPointCloudConvertion(lidarmsg, pointcloud, start, end, true);
 
+    if (start == 0 || end == 0 || pointcloud->points.empty()) {
+        LOGW << "Invalid point cloud data received, skipping frame.";
+        return;
+    }
+
     // Create lidar frame
     auto frame = LidarFrame::createFrame(pointcloud->points.front().time, pointcloud->points.back().time, pointcloud);
     lins_->addNewLidarFrame(frame);
@@ -257,8 +262,10 @@ void Fusion::pointCloudCallback(const sensor_msgs::PointCloud2ConstPtr &lidarmsg
 
     if (lidar_type_ == Velodyne) {
         lidar_converter_->velodynePointCloudConvertion(lidarmsg, pointcloud, start, end, true);
-    } else {
+    } else if (lidar_type_ == Ouster) {
         lidar_converter_->ousterPointCloudConvertion(lidarmsg, pointcloud, start, end, true);
+    } else if (lidar_type_ == Hesai) {
+        lidar_converter_->hesaiPointCloudConvertion(lidarmsg, pointcloud, start, end, true);
     }
 
     // Create lidar frame

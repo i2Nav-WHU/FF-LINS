@@ -30,7 +30,7 @@ optimizer:
     optimize_lidar_extrinsic_accurate: false # 雷达和IMU的外参初值准确
 
 lidar:
-    lidar_type: 1 # Livox: 1; Velodyne: 2; Ouster: 3
+    lidar_type: 1 # Livox: 1; Velodyne: 2; Ouster: 3; Hesai: 4
 
     # 激光参数
     scan_line: 1 # 扫描线数

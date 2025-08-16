@@ -14,6 +14,10 @@
         <!-- <param name="imu_topic" value="/imu0"/>
         <param name="lidar_topic" value="/velodyne_points"/> -->
 
+        <!-- i2Nav Hesai AT128-->
+        <!-- <param name="imu_topic" value="/adi/adis16465/imu"/> -->
+        <!-- <param name="lidar_topic" value="/hesai/at128/points"/> -->
+
         <param name="configfile" value="$(arg configfile)"/>
 
         <param name="is_read_bag" value="true"/>

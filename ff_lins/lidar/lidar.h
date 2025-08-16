@@ -66,10 +66,23 @@ POINT_CLOUD_REGISTER_POINT_STRUCT(OusterPoint, (float, x, x)(float, y, y)(float,
                                                    std::uint16_t, ambient, ambient)(std::uint32_t, range,
                                                                                     range)(std::uint8_t, ring, ring))
 
+// Hesai LiDAR raw point type
+struct EIGEN_ALIGN16 HesaiPoint {
+    PCL_ADD_POINT4D;
+    float intensity;
+    double timestamp;
+    std::uint16_t ring;
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+};
+
+POINT_CLOUD_REGISTER_POINT_STRUCT(HesaiPoint, (float, x, x)(float, y, y)(float, z, z)(float, intensity, intensity)(
+                                                  double, timestamp, timestamp)(std::uint16_t, ring, ring))
+
 enum LidarType {
     Livox    = 1,
     Velodyne = 2,
     Ouster   = 3,
+    Hesai    = 4,
 };
 
 typedef PointXYZIT PointTypeCustom;

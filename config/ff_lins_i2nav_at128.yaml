@@ -9,16 +9,16 @@ is_use_visualization: true
 
 # IMU噪声建模参数
 imu:
-    imudatarate: 600 # IMU原始数据频率, Hz
+    imudatarate: 200 # IMU原始数据频率, Hz
 
-    arw: 2.0 # deg/sqrt(hr)
-    vrw: 0.2 # m/s/sqrt(hr)
-    gbstd: 500 # deg/hr
-    abstd: 100 # mGal
+    arw: 0.1 # deg/sqrt(hr)
+    vrw: 0.1 # m/s/sqrt(hr)
+    gbstd: 50.0 # deg/hr
+    abstd: 50.0 # mGal
     corrtime: 1.0 # hr
 
-    gb_prior_std: 1000 # deg/hr
-    ab_prior_std: 10000 # mGal
+    gb_prior_std: 1500 # deg/hr
+    ab_prior_std: 1500 # mGal
 
 # 优化器
 optimizer:
@@ -30,11 +30,11 @@ optimizer:
     optimize_lidar_extrinsic_accurate: false # 雷达和IMU的外参初值准确
 
 lidar:
-    lidar_type: 1 # Livox: 1; Velodyne: 2; Ouster: 3; Hesai: 4
+    lidar_type: 4 # Livox: 1; Velodyne: 2; Ouster: 3; Hesai: 4
 
     # 激光参数
-    scan_line: 6 # 扫描线数
-    point_filter_num: 10 # 原始点抽取滤波器
+    scan_line: 128 # 扫描线数
+    point_filter_num: 80 # 原始点抽取滤波器
     nearest_distance: 1 # 扫描盲区, m
     farthest_distance: 250.0 # 最远距离, m
     frame_rate: 10 # 帧率, Hz
@@ -43,7 +43,7 @@ lidar:
     downsample_size: 0.5 # 体素滤波栅格大小, m
     plane_estimation_threshold: 0.1 # 平面拟合最大点到面距离, m
     is_save_pointcloud: false # 保存点云地图
-    minimum_keyframe_translation: 0.25 # 关键帧选择最小距离
+    minimum_keyframe_translation: 0.4 # 关键帧选择最小距离
 
     # 雷达IMU外参 Pb = q_b_l * Pl + t_b_l
     # q (x, y, z, w)
