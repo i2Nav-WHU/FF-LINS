@@ -1,5 +1,5 @@
 /*
- * FF-LINS: A Consistent Frame-to-Frame Solid-State-LiDAR-Inertial State Estimator 
+ * FF-LINS: A Consistent Frame-to-Frame Solid-State-LiDAR-Inertial State Estimator
  *
  * Copyright (C) 2023 i2Nav Group, Wuhan University
  *
@@ -60,8 +60,8 @@ Optimizer::Optimizer(const string &configfile, std::shared_ptr<IntegrationParame
     optimize_estimate_lidar_td_        = config["optimizer"]["optimize_estimate_lidar_td"].as<bool>();
     optimize_lidar_extrinsic_accurate_ = config["optimizer"]["optimize_lidar_extrinsic_accurate"].as<bool>();
 
-    gb_prior_std_ = config["imu"]["gb_prior_std"].as<double>();
-    ab_prior_std_ = config["imu"]["ab_prior_std"].as<double>();
+    gb_prior_std_ = config["imu"]["gb_prior_std"].as<double>() * D2R / 3600.0;
+    ab_prior_std_ = config["imu"]["ab_prior_std"].as<double>() * 1.0e-5;
 
     // 激光参数
     vecdata           = config["lidar"]["q_b_l"].as<std::vector<double>>();
